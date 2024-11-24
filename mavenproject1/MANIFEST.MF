@@ -1,0 +1,7 @@
+format date de naissance (DD/MM/YYYY)
+la tranche doit être comprise(fenetre d'erreur)
+EMPLOYÉ(inscription employé)
+veuillez attendre sa validation
+contenu du mail(veuillez cliquer sur le lien pour la validation de son enregistrement
+
+-> un nouvel employé vient d'envoyer une demande d'ajout

@@ -1,0 +1,340 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package User;
+
+import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import java.util.regex.Pattern;
+
+/**
+ *
+ * @author zikrea
+ */
+public class Userlogin extends javax.swing.JFrame {
+
+    public static int userId;
+    static Connection con = null;
+
+    public static Connection Connect() {
+        String url = "jdbc:mysql://localhost/jonastino";// Connexion sans spécifier de base de données
+        String user = "root";
+        String pass = "";
+
+        if (Userlogin.con == null) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Userlogin.con = (Connection) DriverManager.getConnection(url, user, pass);
+            } catch (ClassNotFoundException | SQLException e) {
+            }
+        }
+        return Userlogin.con;
+    }
+
+    /**
+     * Creates new form Userlogin
+     */
+    public Userlogin() {
+        initComponents();
+        Connect();
+        setLocationRelativeTo(null);
+    }
+
+    public void recupUser() throws ClassNotFoundException {
+        UserSignUp us = new UserSignUp();
+        String sql = "SELECT * FROM employe WHERE Adresse_mail = ? AND Mot_de_passe = ?";
+
+        try {
+            
+                String email = getChamp_mail().getText();
+                      if (!isValidEmail(email)) {
+                // Si l'email est invalide, afficher une alerte et arrêter la méthode
+                alerte.setText("Email non valide!");
+                return; // Arrête l'exécution de la méthode si l'email est invalide
+            }
+
+            try (PreparedStatement preparedStatement = con.prepareStatement(sql)) {
+
+                char[] mdpArray = champ_pass.getPassword();
+                String passw = new String(mdpArray);
+                String emails = getChamp_mail().getText();
+          
+                // Hachage du mot de passe avant l'exécution
+                preparedStatement.setString(1, email);
+                preparedStatement.setString(2, us.hashPassword(passw));
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+                
+
+                if (resultSet.next()) {
+                    Userlogin.userId = resultSet.getInt("Id_employe");
+
+                    // Vérifie si l'employé est vérifié
+                    if(!isValidEmail(emails)){
+                    }else if (isEmployeeVerified(email)) {
+                        JOptionPane.showMessageDialog(null, "Opération réussie", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                        close();
+                        Clientgestion ap = new Clientgestion();
+                        ap.setVisible(true);
+                    } else {
+                        // Si l'employé n'est pas vérifié (log = 0)
+                        JOptionPane.showMessageDialog(null, "Votre compte doit être vérifié par le PDG avant de pouvoir vous connecter.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Veuillez bien vérifier vos Identifiants ou mot de passe.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        } catch (SQLException e) { 
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isEmployeeVerified(String email) throws ClassNotFoundException {
+        String sql = "SELECT log FROM employe WHERE Adresse_mail = ?";
+        try (PreparedStatement statement = con.prepareStatement(sql)) {
+
+            statement.setString(1, email);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                // Vérifie si le champ 'log' est égal à 1 (employé vérifié)
+                return resultSet.getInt("log") == 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void close() {
+        WindowEvent closeWindow = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
+        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(closeWindow);
+    }
+    
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        return pattern.matcher(email).matches();
+    }
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        champ_mail = new javax.swing.JTextField();
+        champ_pass = new javax.swing.JPasswordField();
+        mail = new javax.swing.JLabel();
+        password = new javax.swing.JLabel();
+        login = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        alerte = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Page de connexion employé");
+        setResizable(false);
+
+        jPanel2.setBackground(new java.awt.Color(204, 204, 204));
+
+        champ_mail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                champ_mailActionPerformed(evt);
+            }
+        });
+
+        mail.setText("Adresse email");
+
+        password.setText("Mot de passe");
+
+        login.setBackground(new java.awt.Color(102, 204, 255));
+        login.setText("Se connecter");
+        login.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Cantarell", 1, 36)); // NOI18N
+        jLabel1.setText("Three L");
+
+        jButton1.setBackground(new java.awt.Color(51, 255, 204));
+        jButton1.setText("S'inscrire");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        alerte.setForeground(new java.awt.Color(255, 51, 0));
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(446, 446, 446)
+                .addComponent(jButton1)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(367, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(mail)
+                            .addComponent(password)
+                            .addComponent(champ_pass, javax.swing.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
+                            .addComponent(champ_mail, javax.swing.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
+                            .addComponent(alerte, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(370, 370, 370))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(login, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(423, 423, 423))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(430, 430, 430))))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(103, 103, 103)
+                .addComponent(jLabel1)
+                .addGap(40, 40, 40)
+                .addComponent(mail)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(champ_mail, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(1, 1, 1)
+                .addComponent(alerte, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(password)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(champ_pass, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48)
+                .addComponent(login, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addGap(29, 29, 29))
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void loginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginActionPerformed
+        try {
+            // TODO add your handling code here:
+            recupUser();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Userlogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_loginActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        close();
+        UserSignUp ap = new UserSignUp();
+        ap.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void champ_mailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_champ_mailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_champ_mailActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Userlogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Userlogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Userlogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Userlogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new Userlogin().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel alerte;
+    private javax.swing.JTextField champ_mail;
+    private javax.swing.JPasswordField champ_pass;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JButton login;
+    private javax.swing.JLabel mail;
+    private javax.swing.JLabel password;
+    // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the userId
+     */
+    public static int getUserId() {
+        return userId;
+    }
+
+    /**
+     * @return the champ_mail
+     */
+    public javax.swing.JTextField getChamp_mail() {
+        return champ_mail;
+    }
+}
